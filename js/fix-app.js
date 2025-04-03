@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * Esta solución arregla el error "TypeError: params.limitedDb is undefined"
  * en la función onTestCalibrationClick
- * 
+*/ 
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -146,7 +146,6 @@ document.addEventListener('DOMContentLoaded', function() {
  * Esta solución mejora la inicialización del AudioContext
  * para cumplir con las políticas de autoplay de los navegadores
  * 
- * Añade este código al final del archivo fix-app.js
  */
 
 document.addEventListener('DOMContentLoaded', function() {
