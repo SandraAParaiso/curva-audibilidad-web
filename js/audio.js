@@ -14,16 +14,21 @@ const AudioSystem = {
     oscillator: null,
     gainNode: null,
     panNode: null,
+    isInitialized: false,
     
     // Método de inicialización
     init: function() {
         try {
+            if (this.isInitialized) return true;
+            
             // Crear contexto de audio
             this.context = new AudioContext();
+            this.isInitialized = true;
             
             // Mostrar mensaje en consola
             console.log("Sistema de audio inicializado correctamente.");
             console.log("Frecuencia de muestreo:", this.context.sampleRate, "Hz");
+            console.log("Estado del contexto:", this.context.state);
             
             // Auto-reanudar contexto de audio para navegadores que lo requieran
             this.setupAutoResume();
@@ -40,16 +45,43 @@ const AudioSystem = {
         // En algunos navegadores, el contexto de audio se suspende hasta que el usuario interactúa
         const resumeAudio = () => {
             if (this.context && this.context.state === 'suspended') {
-                this.context.resume();
-                console.log("Contexto de audio reactivado");
+                this.context.resume().then(() => {
+                    console.log("Contexto de audio reactivado:", this.context.state);
+                }).catch(err => {
+                    console.error("Error reactivando contexto de audio:", err);
+                });
             }
         };
         
         // Eventos que pueden desbloquear el audio
-        const events = ['click', 'touchstart', 'keydown'];
+        const events = ['click', 'touchstart', 'keydown', 'touchend'];
         events.forEach(event => {
-            document.addEventListener(event, resumeAudio, { once: true });
+            document.addEventListener(event, resumeAudio);
         });
+        
+        // Verificar y registrar estado del contexto
+        setInterval(() => {
+            if (this.context) {
+                // Solo para depuración, no afecta funcionamiento
+                console.debug("Estado actual del contexto de audio:", this.context.state);
+            }
+        }, 5000);
+    },
+    
+    // Método para asegurar que el contexto esté activo
+    ensureContext: function() {
+        if (!this.isInitialized) {
+            this.init();
+        }
+        
+        if (this.context && this.context.state === 'suspended') {
+            console.log("Intentando reactivar contexto suspendido...");
+            this.context.resume().catch(err => {
+                console.error("Error intentando reactivar contexto:", err);
+            });
+        }
+        
+        return this.isInitialized;
     },
     
     // Método para generar y reproducir un tono
@@ -63,16 +95,16 @@ const AudioSystem = {
                 throw new Error("Frecuencia inválida");
             }
             
+            // Asegurar que el contexto está activo
+            if (!this.ensureContext()) {
+                throw new Error("No se pudo inicializar el contexto de audio");
+            }
+            
             // Limitar amplitud por seguridad (como en la versión original)
             amplitude = Math.min(amplitude, 0.75);
             
             // Detener reproducción previa si existe
             this.stopTone();
-            
-            // Si el contexto está suspendido, intentar reactivarlo
-            if (this.context.state === 'suspended') {
-                this.context.resume();
-            }
             
             // Crear oscilador
             this.oscillator = this.context.createOscillator();
@@ -102,8 +134,18 @@ const AudioSystem = {
             
             // Configurar canal estéreo según parámetro
             if (ear !== 'both') {
-                this.panNode = this.context.createStereoPanner();
-                this.panNode.pan.value = (ear === 'left') ? -1 : 1;
+                // Usar PannerNode en lugar de StereoPannerNode para mayor compatibilidad
+                try {
+                    // Intentar con StereoPannerNode primero (más moderno)
+                    this.panNode = this.context.createStereoPanner();
+                    this.panNode.pan.value = (ear === 'left') ? -1 : 1;
+                } catch (e) {
+                    // Fallback a PannerNode (más compatible)
+                    console.log("Usando PannerNode como alternativa");
+                    this.panNode = this.context.createPanner();
+                    this.panNode.panningModel = 'equalpower';
+                    this.panNode.setPosition((ear === 'left') ? -1 : 1, 0, 0);
+                }
                 
                 // Conectar nodos: oscilador -> ganancia -> paneo -> salida
                 this.oscillator.connect(this.gainNode);
@@ -117,6 +159,9 @@ const AudioSystem = {
             
             // Iniciar oscilador
             this.oscillator.start();
+            
+            // Registrar estado por si se necesita depurar
+            console.log(`Reproduciendo tono: ${frequency}Hz, amplitud: ${amplitude}, oído: ${ear}`);
             
             // Programar parada automática
             setTimeout(() => {
@@ -134,7 +179,11 @@ const AudioSystem = {
     stopTone: function() {
         try {
             if (this.oscillator) {
-                this.oscillator.stop();
+                try {
+                    this.oscillator.stop();
+                } catch (e) {
+                    console.log("Oscilador ya detenido o no iniciado");
+                }
                 this.oscillator.disconnect();
                 this.oscillator = null;
             }
@@ -184,5 +233,17 @@ const AudioSystem = {
 
 // Inicializar sistema de audio cuando se cargue la página
 document.addEventListener('DOMContentLoaded', function() {
-    AudioSystem.init();
+    // No inicializamos aquí, esperamos interacción del usuario
+    console.log("DOM cargado. El sistema de audio se inicializará con la primera interacción del usuario.");
+    
+    // Agregar listener para inicializar con la primera interacción
+    const initAudioOnFirstInteraction = () => {
+        AudioSystem.init();
+        // Quitar el listener después de la primera interacción
+        document.removeEventListener('click', initAudioOnFirstInteraction);
+        document.removeEventListener('touchstart', initAudioOnFirstInteraction);
+    };
+    
+    document.addEventListener('click', initAudioOnFirstInteraction);
+    document.addEventListener('touchstart', initAudioOnFirstInteraction);
 });
