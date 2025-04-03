@@ -286,8 +286,5 @@ const ChartsSystem = {
         // Actualizar gráficos
         this.audibilityChart.update();
         this.audiogramChart.update();
-
     }
 };
-
-        
