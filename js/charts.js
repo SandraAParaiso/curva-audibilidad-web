@@ -256,7 +256,7 @@ const ChartsSystem = {
             
             // Calcular audiograma (umbral estándar - valor corregido)
             const audiogramBoth = frequencies.map((_, index) => {
-                return dataBoth[index] - this.umbralEstandar[index];
+                return this.umbralEstandar[index] - dataBoth[index];
             });
             this.audiogramChart.data.datasets[1].data = audiogramBoth;
         }
@@ -267,7 +267,7 @@ const ChartsSystem = {
             
             // Calcular audiograma
             const audiogramRight = frequencies.map((_, index) => {
-                return dataRight[index] - this.umbralEstandar[index];
+                return this.umbralEstandar[index] - dataRight[index];
             });
             this.audiogramChart.data.datasets[2].data = audiogramRight;
         }
@@ -278,7 +278,7 @@ const ChartsSystem = {
             
             // Calcular audiograma
             const audiogramLeft = frequencies.map((_, index) => {
-                return dataLeft[index] - this.umbralEstandar[index];
+                return  this.umbralEstandar[index] -dataLeft[index];
             });
             this.audiogramChart.data.datasets[3].data = audiogramLeft;
         }
