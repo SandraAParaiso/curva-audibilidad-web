@@ -69,3 +69,75 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
+/**
+ * Esta solución arregla el error "TypeError: params.limitedDb is undefined"
+ * en la función onTestCalibrationClick
+ * 
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar que APP y AudioSystem estén definidos
+    if (typeof APP !== 'undefined' && typeof AudioSystem !== 'undefined') {
+        console.log("Corrigiendo función onTestCalibrationClick para evitar error de limitedDb");
+        
+        // Sobrescribir completamente la función
+        APP.onTestCalibrationClick = function() {
+            try {
+                // Detener cualquier tono anterior
+                AudioSystem.stopTone();
+                
+                // Usar un valor seguro para la amplitud (0.2 es moderado)
+                const amplitude = 0.2;
+                
+                // Reproducir directamente con AudioSystem sin usar params
+                const success = AudioSystem.playTone(2000, amplitude, 'both', 0.5);
+                
+                if (success) {
+                    // Actualizar estado con información segura (sin usar limitedDb)
+                    this.setStatus(`Reproduciendo tono de calibración a 2000 Hz (amplitud: ${amplitude.toFixed(4)})`);
+                } else {
+                    this.setStatus(`Error reproduciendo tono de calibración`);
+                }
+            } catch (e) {
+                console.error("Error en calibración:", e);
+                this.setStatus(`Error en calibración: ${e.message}`);
+            }
+        };
+
+        // También sobrescribir la función playTone para manejar el caso donde params.limitedDb es undefined
+        const originalPlayTone = APP.playTone;
+        APP.playTone = function(frequency, sliderValue) {
+            try {
+                // Generar parámetros del tono
+                const params = AudioSystem.generateToneParams(frequency, sliderValue, this.state.knobValue);
+                
+                // Determinar canal según modo actual
+                let ear = 'both';
+                if (this.state.currentMode === 'left_ear') {
+                    ear = 'left';
+                } else if (this.state.currentMode === 'right_ear') {
+                    ear = 'right';
+                }
+                
+                // Reproducir tono (usar duration 0.5 para duración fija)
+                AudioSystem.playTone(params.frequency, params.amplitude, ear, 0.5);
+                
+                // Actualizar estado de manera segura, comprobando si limitedDb existe
+                if (params.limitedDb !== undefined) {
+                    this.setStatus(`Reproduciendo ${frequency} Hz a ${params.limitedDb.toFixed(1)} dB (amplitud: ${params.amplitude.toFixed(4)})`);
+                } else {
+                    this.setStatus(`Reproduciendo ${frequency} Hz (amplitud: ${params.amplitude.toFixed(4)})`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error("Error reproduciendo tono:", error);
+                this.setStatus(`Error reproduciendo tono: ${error.message}`);
+                return false;
+            }
+        };
+    } else {
+        console.error("No se pueden aplicar correcciones: APP o AudioSystem no están definidos");
+    }
+});
