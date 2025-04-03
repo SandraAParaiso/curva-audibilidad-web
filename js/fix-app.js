@@ -141,3 +141,105 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("No se pueden aplicar correcciones: APP o AudioSystem no están definidos");
     }
 });
+
+/**
+ * Esta solución mejora la inicialización del AudioContext
+ * para cumplir con las políticas de autoplay de los navegadores
+ * 
+ * Añade este código al final del archivo fix-app.js
+ */
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Comprobar que AudioSystem esté definido
+    if (typeof AudioSystem !== 'undefined') {
+        console.log("Mejorando manejo de políticas de autoplay para AudioContext");
+        
+        // Función mejorada para reanudar el contexto de audio
+        function resumeAudioContext() {
+            if (AudioSystem.context && AudioSystem.context.state === 'suspended') {
+                AudioSystem.context.resume().then(() => {
+                    console.log("AudioContext reanudado exitosamente");
+                    // Actualizar el estado si APP está disponible
+                    if (window.APP) {
+                        APP.setStatus("Audio activado. Ya puede realizar la prueba de calibración.");
+                    }
+                }).catch(err => {
+                    console.error("Error al reanudar AudioContext:", err);
+                });
+            }
+        }
+        
+        // Mejorar el método onTestCalibrationClick para intentar reanudar el contexto primero
+        if (window.APP) {
+            const originalTestCalibration = APP.onTestCalibrationClick;
+            APP.onTestCalibrationClick = function() {
+                // Intentar reanudar el contexto primero
+                if (AudioSystem.context && AudioSystem.context.state === 'suspended') {
+                    AudioSystem.context.resume().then(() => {
+                        console.log("AudioContext reanudado, ahora reproduciendo sonido");
+                        originalTestCalibration.call(this);
+                    }).catch(err => {
+                        console.error("Error al reanudar AudioContext:", err);
+                        this.setStatus("Error activando audio. Intente hacer clic en otro lugar de la página primero.");
+                    });
+                } else {
+                    // Si ya está activo, proceder normalmente
+                    originalTestCalibration.call(this);
+                }
+            };
+            
+            // También mejorar el método playTone
+            const originalPlayTone = APP.playTone;
+            APP.playTone = function(frequency, sliderValue) {
+                // Intentar reanudar el contexto primero si está suspendido
+                if (AudioSystem.context && AudioSystem.context.state === 'suspended') {
+                    this.setStatus("Activando audio. Por favor espere...");
+                    
+                    AudioSystem.context.resume().then(() => {
+                        console.log("AudioContext reanudado, ahora llamando a playTone original");
+                        originalPlayTone.call(this, frequency, sliderValue);
+                    }).catch(err => {
+                        console.error("Error al reanudar AudioContext:", err);
+                        this.setStatus("Error activando audio. Intente hacer clic en el botón 'Test de calibración' primero.");
+                    });
+                    
+                    return true; // Devolvemos true para evitar mensajes de error
+                } else {
+                    // Si ya está activo, proceder normalmente
+                    return originalPlayTone.call(this, frequency, sliderValue);
+                }
+            };
+        }
+        
+        // Agregar listeners a más elementos interactivos específicos de la aplicación
+        const interactiveElements = [
+            'test-calibration-btn',
+            'ready-btn',
+            'knob-slider',
+            'stop-sound-btn'
+        ];
+        
+        interactiveElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                // Usar el evento click para intentar reanudar el contexto
+                element.addEventListener('click', function(e) {
+                    console.log(`Interacción detectada en ${id}, intentando reanudar AudioContext`);
+                    resumeAudioContext();
+                });
+            }
+        });
+        
+        // También agregar a todo el documento para cualquier interacción
+        const userInteractionEvents = ['click', 'touchstart', 'keydown', 'mousedown'];
+        userInteractionEvents.forEach(eventType => {
+            document.addEventListener(eventType, function() {
+                resumeAudioContext();
+            }, { once: false }); // Permitir múltiples intentos
+        });
+        
+        console.log("Mejoras para manejo de AudioContext instaladas");
+    } else {
+        console.error("No se puede mejorar AudioContext: AudioSystem no está definido");
+    }
+});
