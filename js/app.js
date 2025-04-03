@@ -342,7 +342,7 @@ const APP = {
             
             // Calcular audiogramas
             const audiogramBoth = this.frequencies.map((_, i) => {
-                return ChartsSystem.umbralEstandar[i]-dataBoth[i] - ;
+                return ChartsSystem.umbralEstandar[i]-dataBoth[i];
             });
             
             const audiogramLeft = this.frequencies.map((_, i) => {
