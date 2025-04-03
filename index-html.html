@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curva de Audibilidad Humana</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Dependencia adicional para escala logarítmica en Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Determinación de la Curva de Audibilidad Humana y del Audiograma</h1>
+            <p>Esta aplicación le permite medir su umbral de audición para distintas frecuencias</p>
+        </header>
+
+        <div class="safety-notice">
+            <h3>⚠️ NOTA DE SEGURIDAD</h3>
+            <p>El volumen máximo ha sido limitado para proteger su audición. Se recomienda usar auriculares.</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Panel izquierdo con controles -->
+            <div class="control-panel">
+                <!-- Sección 1: Calibración -->
+                <div class="panel-section" id="calibration-section">
+                    <h2>Calibración del volumen</h2>
+                    <p>Ajuste el volumen moviendo la barra hasta que comience a percibir el sonido</p>
+                    
+                    <div class="slider-container">
+                        <label for="knob-slider">Nivel:</label>
+                        <input type="range" id="knob-slider" min="0" max="100" value="50" class="slider">
+                        <span id="knob-value">50</span>
+                    </div>
+                    
+                    <button id="test-calibration-btn" class="btn">Test de calibración</button>
+                    <button id="ready-btn" class="btn primary">¡Pulse para comenzar!</button>
+                </div>
+
+                <!-- Sección 2: Selección de oídos -->
+                <div class="panel-section" id="ear-selection-section">
+                    <h2>Presentación de estímulos</h2>
+                    
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="both-ears" name="ear-mode" value="both" checked disabled>
+                            <label for="both-ears">Ambos oídos</label>
+                        </div>
+                        
+                        <div class="radio-option">
+                            <input type="radio" id="left-ear" name="ear-mode" value="left" disabled>
+                            <label for="left-ear">Oído izquierdo</label>
+                        </div>
+                        
+                        <div class="radio-option">
+                            <input type="radio" id="right-ear" name="ear-mode" value="right" disabled>
+                            <label for="right-ear">Oído derecho</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Visualización de datos -->
+                <div class="panel-section" id="visualization-section">
+                    <h2>Mostrar datos</h2>
+                    
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="show-both" checked disabled>
+                            <label for="show-both">Ambos oídos</label>
+                        </div>
+                        
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="show-left" disabled>
+                            <label for="show-left">Oído izquierdo</label>
+                        </div>
+                        
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="show-right" disabled>
+                            <label for="show-right">Oído derecho</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 4: Información personal -->
+                <div class="panel-section" id="personal-info-section">
+                    <h2>Información personal</h2>
+                    
+                    <div class="form-group">
+                        <label for="initials">Iniciales:</label>
+                        <input type="text" id="initials" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="age">Edad:</label>
+                        <input type="number" id="age" min="1" max="120" disabled>
+                    </div>
+                    
+                    <button id="save-btn" class="btn success" disabled>Guardar datos</button>
+                </div>
+
+                <!-- Sección 5: Botones de acción -->
+                <div class="panel-section" id="action-buttons">
+                    <button id="recalibrate-btn" class="btn" disabled>Recalibrar el volumen</button>
+                    <button id="restart-btn" class="btn warning" disabled>Reiniciar</button>
+                    <button id="stop-sound-btn" class="btn danger">Stop</button>
+                </div>
+            </div>
+
+            <!-- Panel central con sliders de frecuencia -->
+            <div class="frequency-sliders-container">
+                <h2>Ajuste la barra de cada tono puro hasta que lo dejes de oir</h2>
+                
+                <div class="frequency-sliders" id="frequency-sliders">
+                    <!-- Los sliders se generarán dinámicamente con JavaScript -->
+                </div>
+            </div>
+
+            <!-- Panel derecho con gráficos -->
+            <div class="graphs-panel">
+                <div class="graph-container">
+                    <canvas id="audibility-chart"></canvas>
+                </div>
+                <div class="graph-container">
+                    <canvas id="audiogram-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar" id="status-bar">
+            Listo para comenzar. Por favor, calibre el volumen y pulse 'Pulse para comenzar!'
+        </div>
+    </div>
+
+    <!-- Scripts de la aplicación -->
+    <script src="js/audio.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
