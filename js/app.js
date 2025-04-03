@@ -342,15 +342,15 @@ const APP = {
             
             // Calcular audiogramas
             const audiogramBoth = this.frequencies.map((_, i) => {
-                return dataBoth[i] - ChartsSystem.umbralEstandar[i] ;
+                return ChartsSystem.umbralEstandar[i]-dataBoth[i] - ;
             });
             
             const audiogramLeft = this.frequencies.map((_, i) => {
-                return dataLeft[i] - ChartsSystem.umbralEstandar[i] ;
+                return  ChartsSystem.umbralEstandar[i] - dataLeft[i] ;
             });
             
             const audiogramRight = this.frequencies.map((_, i) => {
-                return dataRight[i] - ChartsSystem.umbralEstandar[i];
+                return  ChartsSystem.umbralEstandar[i] - dataRight[i];
             });
             
             // Crear objeto de datos
