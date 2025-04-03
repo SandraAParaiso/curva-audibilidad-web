@@ -575,6 +575,17 @@ const APP = {
     }
 };
 
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        await AudioSystem.init(); // Asegurar que AudioSystem está listo
+        await ChartsSystem.init(); // Asegurar que ChartsSystem está listo
+        APP.init(); // Ahora podemos inicializar APP
+    } catch (error) {
+        console.error("Error al inicializar los sistemas:", error);
+    }
+});
+
+
 // Inicializar la aplicación cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {
     APP.init();
