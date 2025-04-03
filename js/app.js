@@ -350,7 +350,7 @@ const APP = {
             });
             
             const audiogramRight = this.frequencies.map((_, i) => {
-                return dataRight[i] - ChartsSystem.umbralEstandar[i] -;
+                return dataRight[i] - ChartsSystem.umbralEstandar[i];
             });
             
             // Crear objeto de datos
