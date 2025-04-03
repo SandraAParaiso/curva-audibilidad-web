@@ -9,7 +9,7 @@ const ChartsSystem = {
     audiogramChart: null,
     
     // Constantes ISO 1961. Robinson and Dadson (1956)
-    umbralEstandar: [-21.4, -11.2, -6, -4.2, -1, 3.9, -15.3, -12],
+    umbralEstandar: [21.4, 11.2, 6, 4.2, 1, -3.9, 15.3, 12],
     
     // Método de inicialización
     init: function(frequencies) {
