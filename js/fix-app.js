@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * Esta solución arregla el error "TypeError: params.limitedDb is undefined"
  * en la función onTestCalibrationClick
-*/ 
+ */ 
 
 
 document.addEventListener('DOMContentLoaded', function() {
