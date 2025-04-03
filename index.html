@@ -14,54 +14,6 @@
 </head>
 <body>
     <div class="container">
-
-    <div id="audio-init-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-    <h2 style="color: white; margin-bottom: 20px; text-align: center;">Para utilizar esta aplicación es necesario habilitar el audio</h2>
-    <button id="init-audio-btn" style="padding: 15px 30px; font-size: 18px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        ¡Habilitar Audio!
-    </button>
-    <p style="color: white; margin-top: 20px; text-align: center; max-width: 80%;">
-        Los navegadores modernos requieren una interacción del usuario para permitir la reproducción de audio.
-    </p>
-</div>
-
-<script>
-document.getElementById('init-audio-btn').addEventListener('click', function() {
-    // Inicializar audio con interacción del usuario
-    if (window.AudioSystem) {
-        AudioSystem.init();
-        
-        // Reproducir un tono silencioso para desbloquear audio en iOS/Safari
-        try {
-            const tempContext = new AudioContext();
-            const tempOsc = tempContext.createOscillator();
-            const tempGain = tempContext.createGain();
-            tempGain.gain.value = 0.001; // Casi silencioso
-            tempOsc.connect(tempGain);
-            tempGain.connect(tempContext.destination);
-            tempOsc.start();
-            tempOsc.stop(tempContext.currentTime + 0.5);
-            
-            // También probar con Audio API
-            const silence = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
-            silence.play().catch(e => console.log("Error reproduciendo silence:", e));
-        } catch (e) {
-            console.log("Error desbloqueando audio:", e);
-        }
-        
-        // Verificar estado del contexto de audio
-        if (AudioSystem.context) {
-            console.log("Estado del contexto después de inicialización:", AudioSystem.context.state);
-        }
-        
-        // Ocultar overlay
-        document.getElementById('audio-init-overlay').style.display = 'none';
-    } else {
-        alert("Error: Sistema de audio no disponible. Por favor, recarga la página.");
-    }
-});
-</script>
-        
         <header>
             <h1>Determinación de la Curva de Audibilidad Humana y del Audiograma</h1>
             <p>Esta aplicación le permite medir su umbral de audición para distintas frecuencias</p>
